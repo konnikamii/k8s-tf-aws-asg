@@ -29,5 +29,5 @@ output "master_node_public_ip" {
 }
 
 output "worker_node_public_ip" {
-  value = "ssh root@${aws_instance.worker-node.public_ip}"
+  value = join(", ", [for instance in aws_instance.worker-node : "ssh -i ~/.ssh/aws_key root@${instance.public_ip}"])
 }

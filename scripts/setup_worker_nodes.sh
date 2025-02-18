@@ -1,8 +1,9 @@
 #!/bin/bash 
  
-sudo hostnamectl set-hostname workernode
+sudo hostnamectl set-hostname workernode-${NODE_INDEX}
  
 echo "CONTROL_PLANE_IP=${CONTROL_PLANE_IP}" | sudo tee -a /etc/environment
+echo "NODE_INDEX=${NODE_INDEX}" | sudo tee -a /etc/environment
 source /etc/environment
    
 # Fetch the join command from the control plane node

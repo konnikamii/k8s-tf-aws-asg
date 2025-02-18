@@ -144,18 +144,18 @@ resource "aws_instance" "master-node" {
 }
 
 resource "aws_instance" "worker-node" {
+  count = 2
   instance_type          = "t2.micro" 
   ami                    = data.aws_ami.ubuntu-ami.id
   key_name               = data.aws_key_pair.auth-key.key_name 
   vpc_security_group_ids = [aws_security_group.security-group-nodes.id]
-  subnet_id              = aws_subnet.subnet-public[0].id
+  subnet_id              = aws_subnet.subnet-public[count.index].id
   
   # root_block_device {
   #   volume_size = 10
-  # }
-
+  # } 
   tags = {
-    Name = "${var.project_name}-worker-node"
+    Name = "${var.project_name}-worker-node-${count.index + 1}"
   }
 
   user_data = join( "\n", [ 
@@ -163,6 +163,7 @@ resource "aws_instance" "worker-node" {
     file("/scripts/setup_containerd.sh"), 
     file("/scripts/setup_k8s.sh"),  
     "CONTROL_PLANE_IP=${data.aws_instance.master_node.public_ip}",
+    "NODE_INDEX=${count.index + 1}",
     file("/scripts/setup_worker_nodes.sh"), 
     file("/scripts/cleanup.sh"), 
   ]
@@ -205,9 +206,13 @@ resource "aws_lb_target_group" "target-group" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc.id 
 }
-resource "aws_lb_target_group_attachment" "target-group-attachment" { 
+resource "aws_lb_target_group_attachment" "target-group-attachment" {   
+  for_each = {
+    for k, v in aws_instance.worker-node :
+    k => v
+  }
   target_group_arn = aws_lb_target_group.target-group.arn
-  target_id        = aws_instance.worker-node.id
+  target_id        = each.value.id
   port             = 80 
 }
 
