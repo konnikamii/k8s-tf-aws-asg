@@ -9,4 +9,4 @@ spec:
   - protocol: TCP
     port: 80      # External port
     targetPort: 80 # Internal container port
-  type: LoadBalancer
+  type: NodePort  # Expose on a random high port (30000-32767)
