@@ -205,6 +205,11 @@ resource "aws_lb_target_group" "target-group" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.vpc.id 
 }
+resource "aws_lb_target_group_attachment" "target-group-attachment" { 
+  target_group_arn = aws_lb_target_group.target-group.arn
+  target_id        = aws_instance.worker-node.id
+  port             = 80 
+}
 
 resource "aws_lb" "loadbalancer" {
   name               = "${var.project_name}-loadbalancer"

@@ -12,6 +12,8 @@ spec:
       labels:
         app: nginx
     spec:
+      nodeSelector:
+        node-role.kubernetes.io/worker: worker
       containers:
       - name: nginx
         image: nginx:latest
